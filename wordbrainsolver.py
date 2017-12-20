@@ -1,6 +1,6 @@
 # Copyright 2017 Keval Khara kevalk@bu.edu
 # Copyright 2017 Harish N Sathishchandra harishns@bu.edu
-# Copyright 2017 Junchen caimedx@bu.edu
+# Copyright 2017 Junchen Cai cairnedx@bu.edu
 
 from sys import argv
 import numpy as np
