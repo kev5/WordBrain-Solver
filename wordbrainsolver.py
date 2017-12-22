@@ -205,7 +205,7 @@ def final(line_1, short_word_1, long_word_1,
 
 
 def main():
-    '''Readind Puzzles and Computing'''
+    '''Reading Puzzles and Computing'''
     with open(argv[1], 'r') as word_list1:
         words1 = word_list1.read().split()
     with open(argv[2], 'r') as word_list2:
