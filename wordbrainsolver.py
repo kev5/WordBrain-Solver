@@ -1,6 +1,5 @@
 # Copyright 2017 Keval Khara kevalk@bu.edu
 # Copyright 2017 Harish N Sathishchandra harishns@bu.edu
-# Copyright 2017 Donato Kava dkava@bu.edu
 # Copyright 2017 Junchen Cai cairnedx@bu.edu
 
 '''WordBrain Solver'''
