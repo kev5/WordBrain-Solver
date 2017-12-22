@@ -1,47 +1,15 @@
 # Copyright 2017 Keval Khara kevalk@bu.edu
 # Copyright 2017 Harish N Sathishchandra harishns@bu.edu
+# Copyright 2017 Donato Kava dkava@bu.edu
 # Copyright 2017 Junchen Cai cairnedx@bu.edu
 
+'''WordBrain Solver'''
 from sys import argv
 import numpy as np
 
 
-def puzz_read():
-    line_1 = []
-    rows = []
-    blank_space = []
-    blank_space_rows = []
-    column_out_line = []
-    while 1:
-        try:
-            in_puzz = input()
-            if '*' not in in_puzz and ' ' not in in_puzz:
-                for i in in_puzz:
-                    rows.append(i)
-                line_1.append(rows)
-                rows = []
-            else:
-                column_out = 0
-                for i in in_puzz + ' ':
-                    if i == ' ':
-                        column_out_line.append(column_out)
-                        column_out = 0
-                        blank_space_rows.append(blank_space)
-                        blank_space = []
-                    else:
-                        column_out += 1
-                        blank_space.append(i)
-                break
-        except EOFError:
-            break
-    if line_1 != [] and column_out_line != [] and blank_space_rows != []:
-        
-        return (np.array(line_1), column_out_line, blank_space_rows)
-#    else:
-#        return False
-
-
 def trie(words):
+    '''Retrieval Data Structure'''
     word_1 = dict()
     for word in words:
         new_word = word_1
@@ -51,29 +19,32 @@ def trie(words):
     return word_1
 
 
-def find_neighbour(index, exist, matrix):
+def routes(paths, neighbors):
+    '''Different Routes'''
+    result = []
+    for neighbor in neighbors:
+        result.append(paths + [neighbor])
+    return result
+
+
+def find_neighbor(index, exist, matrix):
+    '''Finding Neighboring Letters'''
     locations = []
     x, y = index
     nrows, ncols = np.shape(matrix)
     for i in range(-1, 2):
         for j in range(-1, 2):
             index = (x + i, y + j)
-            if index[0] >= 0 and index[1] >= 0 and index[0] < nrows:
-                if index[1] < ncols and index not in exist and matrix[index]:
+            if (index[0] >= 0 and index[1] >= 0
+                and index[0] < nrows):
+                if (index[1] < ncols and index not in exist 
+                    and matrix[index]):
                     locations.append(index)
-    
     return locations
 
 
-def extend(paths, neighbours):
-    result = []
-    for i in neighbours:
-        result.append(paths + [i])
-    
-    return result
-
-
 def valid_path(path, matrix, word_1):
+    '''Valid Path'''
     char = ''
     tmp = word_1
     for index in path:
@@ -85,9 +56,10 @@ def valid_path(path, matrix, word_1):
 
 
 def find_combinations(index, size, matrix, word_1):
+    '''Finding Combinations'''
     exist = [index]
-    neibour = find_neighbour(exist[0], exist, matrix)
-    exist = extend(exist, neibour)
+    neibour = find_neighbor(exist[0], exist, matrix)
+    exist = routes(exist, neibour)
     i = 2
     if size == 2:
         combo = exist
@@ -95,24 +67,16 @@ def find_combinations(index, size, matrix, word_1):
         combo = []
         for path in exist:
             if valid_path(path, matrix, word_1):
-                co1 = extend(path, find_neighbour(path[-1], path, matrix))
+                co1 = routes(path, find_neighbor(
+                    path[-1], path, matrix))
                 combo += co1
         exist = combo
         i += 1
-    
     return combo
 
 
-def matrix_indices(size):
-    result = []
-    for i in range(size):
-        for j in range(size):
-            result.append((i, j))
-            
-    return result
-
-
-def word_path(path, matrix, word_1):
+def create_word(path, matrix, word_1):
+    '''Create Word from the Path'''
     word = ''
     for index in path:
         word += matrix[index]
@@ -122,20 +86,20 @@ def word_path(path, matrix, word_1):
 
 
 def search_word(key_word_list, word_1):
+    '''Searching for Words'''
     for word in key_word_list:
         tmp = word_1
-        for i in word:
-            if i not in tmp:
+        for val in word:
+            if val not in tmp:
                 return 0
             else:
-                tmp = tmp[i]
+                tmp = tmp[val]
         if 0 in tmp:
             return 1
-#        else:
-#            return 0
 
 
 def remove_word(path, matrix):
+    '''Removing Unwanted Words'''
     temporary_mat_1 = np.copy(matrix)
     if len(path) == 1:
         return matrix
@@ -148,92 +112,138 @@ def remove_word(path, matrix):
         while len(newcolumn1) < num:
             newcolumn1.insert(0, 0)
         newmatrix1.append(newcolumn1)
-    return np.transpose(np.array(newmatrix1, dtype=object).reshape(num, num))
+    return np.transpose(np.array(
+        newmatrix1, dtype=object).reshape(num, num))
 
 
-def mat_str(matrix, length, word_1, blank_spacein):
-    allmatrix1 = []
-    if blank_spacein == []:
-        fullindex = matrix_indices(np.shape(matrix)[0])
+def matrix_words(matrix, length, word_1, blank_space):
+    '''All possible matrices and words'''
+    full_matrix = []
+    all_indices = []
+    if blank_space == []:
+        for i in range(np.shape(matrix)[0]):
+            for j in range(np.shape(matrix)[0]):
+                all_indices.append((i, j))
     else:
-        fullindex = blank_spacein
-    for index in fullindex:
+        all_indices = blank_space
+    for index in all_indices:
         if matrix[index]:
-            for path in find_combinations(index, length, matrix, word_1):
-                if word_path(path, matrix, word_1):
-                    allmatrix1.append((remove_word(path, matrix),
-                                       word_path(path, matrix, word_1)))
-    return allmatrix1
+            for path in find_combinations(
+                index, length, matrix, word_1):
+                if create_word(path, matrix, word_1):
+                    full_matrix.append((remove_word(path, matrix),
+                                       create_word(
+                                        path, matrix, word_1)))
+    return full_matrix
 
 
-def index_search(blank_space, sindex_1, matrix):
+def index_search(blank, sindex_1, matrix):
+    '''Getting indices of blanks'''
     ind = []
-    for k in blank_space:
-        if k != '*':
+    for star in blank:
+        if star != '*':
             for i in range(sindex_1):
                 for j in range(sindex_1):
-                    if matrix[i][j] == k:
+                    if matrix[i][j] == star:
                         ind.append((i, j))
     return ind
 
 
-def window_slide(matrix, windows, word_1, blank_space_rows):
+def window_slide(matrix, windows, word_1, blank_rows):
+    '''Sliding the window'''
     sindex_1 = np.shape(matrix)[0]
     result = []
     tmp = []
     ind = []
-    blank_space = blank_space_rows[0]
-    ind = index_search(blank_space, sindex_1, matrix)
-    for mtx, wrd in mat_str(matrix, windows[0], word_1, ind):
-        result.append(([wrd], mtx))
-    blank_space_rows.pop(0)
-    windows.pop(0)
-    if windows:
-        for length in windows:
-            blank_space = blank_space_rows[windows.index(length)]
-            ind = index_search(blank_space, sindex_1, matrix)
-            tmp = result
-            result = []
-            for i in tmp:
-                for mtx, wrd in mat_str(i[1], length, word_1, ind):
-                    result.append((i[0] + [wrd], mtx))
-    return result
+    if blank_rows:
+        blank = blank_rows[0]
+        ind = index_search(blank, sindex_1, matrix)
+        for mtx, wrd in matrix_words(matrix, windows[0], word_1, ind):
+            result.append(([wrd], mtx))
+        blank_rows.pop(0)
+        windows.pop(0)
+        if windows:
+            for length in windows:
+                blank = blank_rows[windows.index(length)]
+                ind = index_search(blank, sindex_1, matrix)
+                tmp = result
+                result = []
+                for val in tmp:
+                    for mtx, wrd in matrix_words(val[1], length, 
+                                                 word_1, ind):
+                        result.append((val[0] + [wrd], mtx))
+        return result
 
 
-def get_result(matrix, word_1, column_out_line, blank_space):
+def get_result(matrix, word_1, column_out_line, blank):
+    '''Getting all Results'''
     windows = []
-    blank_space_rows = []
-    for j in blank_space:
-        blank_space_rows.append(j)
-    for i in column_out_line:
-        windows.append(i)
+    blank_rows = []
+    for star in blank:
+        blank_rows.append(star)
+    for col in column_out_line:
+        windows.append(col)
     answers = []
-    result = window_slide(matrix, windows, word_1, blank_space_rows)
-    for i in result:
-        if i[0] not in answers:
-            answers.append(i[0])
-    for i in sorted(answers):
-        print(' '.join(i))
+    result = window_slide(matrix, windows, word_1, blank_rows)
+    for val in result:
+        if val[0] not in answers:
+            answers.append(val[0])
+    for ans in sorted(answers):
+        print(' '.join(ans))
     return answers
 
 
-def final_word(line_1, short_word_1, long_word_1, column_out_line, blank_space):
+def final(line_1, short_word_1, long_word_1, 
+               column_out_line, blank):
+    '''Final Answer'''
     answer = []
-    answer = get_result(line_1, short_word_1, column_out_line, blank_space)
+    answer = get_result(line_1, short_word_1, column_out_line, 
+                        blank)
     if answer == []:
-        answer = get_result(line_1, long_word_1, column_out_line, blank_space)
+        answer = get_result(line_1, long_word_1, column_out_line, 
+                            blank)
     print('.')
 
 
 def main():
+    '''Readind Puzzles and Computing'''
     with open(argv[1], 'r') as word_list1:
         words1 = word_list1.read().split()
     with open(argv[2], 'r') as word_list2:
         words2 = word_list2.read().split()
     while 1:
         try:
-            line_1, column_out_line, blank_space = puzz_read()
-            final_word(line_1, trie(words1), trie(words2), column_out_line, blank_space)
+            line_1 = []
+            rows = []
+            blank = []
+            blank_rows = []
+            column_out_line = []
+            while 1:
+                try:
+                    in_puzz = input()
+                    if '*' and ' ' not in in_puzz:
+                        for puzz in in_puzz:
+                            rows.append(puzz)
+                        line_1.append(rows)
+                        rows = []
+                    else:
+                        column_out = 0
+                        for puzz in in_puzz + ' ':
+                            if puzz == ' ':
+                                column_out_line.append(column_out)
+                                column_out = 0
+                                blank_rows.append(blank)
+                                blank = []
+                            else:
+                                column_out += 1
+                                blank.append(puzz)
+                        break
+                except EOFError:
+                    break        
+            line_1, column_out_line, blank = np.array(
+                  line_1), column_out_line, blank_rows
+            final(line_1, trie(words1), trie(words2), 
+                       column_out_line, blank)
         except TypeError:
             break
 
