@@ -1,6 +1,6 @@
 // Copyright 2017 Keval Khara kevalk@bu.edu
 
-// WordBrain Solver
+/* WordBrain Solver */
 #include <stdlib.h>
 #include <algorithm>
 #include <fstream>
