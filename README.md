@@ -37,7 +37,7 @@ olab
 ***** holly ******
 ```
 
-The solutions to the above puzzles will be in the following format-
+The output of both the programs gives all the possible solutions of a given puzzle. For example, all possible solutions to the above puzzles will be printed in the following format-
 ```
 hoe square
 .
