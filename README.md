@@ -2,7 +2,7 @@
 
 C++ and Python Programs for solving the puzzles in the WordBrain App on Android and iOS.
 
-The inputs to the C++ and Python programs are given by a text file called puzzles.txt which has the puzzles in the following format-
+The inputs to the C++ and Python programs are given by a text file called (puzzles.txt)[https://github.com/kev5/WordBrain-Solver/blob/master/puzzles.txt] which has the puzzles in the following format-
 ```
 hee
 oqr
