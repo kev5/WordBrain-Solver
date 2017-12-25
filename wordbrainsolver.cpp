@@ -1,163 +1,272 @@
 // Copyright 2017 Keval Khara kevalk@bu.edu
 
-#include <iostream>
-#include <string.h>
+// WordBrain Solver
+#include <stdlib.h>
+#include <algorithm>
 #include <fstream>
-#include <stdio.h>
-#define maxnod 1200005
-void firstCall(char mat[15][15],int step);
-void circleCall(int x,int y,char mat[15][15],int step,int now,std::string temp,int cur);
+#include <iostream>
+#include <map>
+#include <set>
+#include <vector>
+#define LETTERS 26
 
-int son[maxnod][26];
-int haslength[maxnod][20];
-int is_word[maxnod];
-int length[105];
-int tot=1;
-int n,m,k;
-int task=0;
-std::string s[105];
-std::string ch[15];
-std::string ans[15];
-char road[105][26][26];
+typedef std::vector <std::vector <char>> wordlist;
 
 
-void ins(std::string s)
-{
-	int len=s.size();
-	int now=1;
-	for (int i=0;i<s.size();i++)
-	{
-		haslength[now][len]=1;
-		if (!son[now][s[i]-'a']) son[now][s[i]-'a']=++tot;
-		now=son[now][s[i]-'a'];
-	}
-	haslength[now][len]=1;
-	is_word[now]=1;
-	return;
-}
-void init1()
-{
-	std::ifstream fin1("large_word_list.txt");
-	std::string s;
-	while (fin1>>s)
-		ins(s);
+struct node {
+ public:
+  char path;
+  struct node *path_0;
+  struct node *letter[LETTERS];
+  std::string w = "";
+  bool F = false;
+};
+
+
+struct balance {
+ public:
+  int d = 0;
+  wordlist wordlist_0;
+  void wordlist_1(int dd);
+  void display(int n);
+};
+
+
+void balance::wordlist_1(int dd) {
+  d = dd;
+  wordlist_0.clear();
+  wordlist_0.resize(d, std::vector <char> (dd, 0));
 }
 
-void circleCall(int x,int y,char mat[15][15],int step,int now,std::string temp,int cur)
-{
-//	if (task==2) cout<<temp<<endl;
-	if (!haslength[cur][length[step]]) return;
-	char pre=mat[x][y];
-	mat[x][y]=0;
-	if (now==s[step].size())
-	{
-		char nex[15][15];
-		memset(nex,0,sizeof(nex));
-		for (int j=1;j<=m;j++)
-		{
-			int tt=n;
-			for (int i=n;i>=1;i--)
-			if (mat[i][j]!=0)
-			{
-				nex[tt][j]=mat[i][j];
-				tt--;
-			}
-		}
-		ans[step]=temp;
-		for (int i=1;i<=n;i++)
-			for (int j=1;j<=m;j++)
-				road[step][i][j]=nex[i][j];
-		if (is_word[cur]==1)
-		{
-			firstCall(nex,step+1);
-		}
-		mat[x][y]=pre;
-		return;
-	}
-	for (int fx=-1;fx<=1;fx++)
-	for (int fy=-1;fy<=1;fy++)
-	if (fx!=0 || fy!=0)
-	{
-		int nex,ney;
-		nex=x+fx; ney=y+fy;
-		if (nex<1 || nex>n || ney<1 || ney>m) continue;
-		if (mat[nex][ney]==0) continue;
-		if (s[step][now]!='*' && s[step][now]!=mat[nex][ney]) continue;
-		if (son[cur][mat[nex][ney]-'a']==0) continue;
-		circleCall(nex,ney,mat,step,now+1,temp+mat[nex][ney],son[cur][mat[nex][ney]-'a']);
-	}
-	mat[x][y]=pre;
-	return;
+
+int attribute(std::vector <std::string> tree, balance *point,
+              node *word_trie,
+              std::vector <int> len,
+              std::map <int, char> Map,
+              std::vector <std::string> *words,
+              std::set <std::string> *Map_set);
+node * head;
+
+
+int trie(std::vector <std::string> tree, balance *point,
+         std::vector <int> len,
+         node *word_trie,
+         std::map <int, char> *Map,
+         int unit0, int unit1,
+         std::vector <std::string> *words,
+         std::set <std::string> *Map_set
+        ) {
+  if (!word_trie) return false;
+  std::map <int, char> Map_trie;
+  Map_trie.insert(Map->begin(), Map->end());
+  (Map_trie)[unit0 + unit1 * point->d] = word_trie->path;
+
+  for (const auto &pointer : (*Map))
+    if (word_trie->F) {
+      std::vector <int> trie_len = len;
+      trie_len.erase(trie_len.begin());
+      std::vector <std::string> words_trie = *words;
+      words_trie.push_back(word_trie->w);
+      for (const auto &pointer : (words_trie))
+        if (attribute(tree, point, head, trie_len,
+                      Map_trie, &words_trie, Map_set)) {
+          *words = words_trie;
+          *Map = Map_trie;
+          return true;
+        } else {
+          return false;
+        }
+    }
+
+  int begin_0 = (unit0 - 1 > 0) ? unit0 - 1 : 0;
+  int end_0 = (unit1 - 1 > 0) ? unit1 - 1 : 0;
+  int begin_1 = (unit0 + 1 < point->d) ? unit0 + 1 : point->d - 1;
+  int end_1 = (unit1 + 1 < point->d) ? unit1 + 1 : point->d - 1;
+  for (int i = begin_0; i <= begin_1; i++) {
+    for (int j = end_0; j <= end_1; j++) {
+      if (Map_trie.count(i + j * point->d))
+        continue;
+      char target;
+      try {
+        target = point->wordlist_0.at(i).at(j);
+      } catch(std::out_of_range) {
+        continue;
+      }
+      if (word_trie->letter[target - 'a']) {
+        if (trie(tree, point, len,
+                 word_trie->letter[point->wordlist_0.at(i).at(j) - 'a'], &
+                 Map_trie, i, j, words, Map_set)) {
+          Map->insert(Map_trie.begin(), Map_trie.end());
+          return true;
+        }
+      }
+    }
+  }
+  return false;
 }
 
-void out(char mat[15][15])
-{
-	for (int i=1;i<=n;i++)
-	{
-		for (int j=1;j<=m;j++)
-		if (mat[i][j]==0)
-			std::cout<<"*";
-		else
-			std::cout<<mat[i][j];
-		std::cout<<std::endl;
-	}
+
+int inputs(std::string ss, node *word_trie) {
+  std::ifstream infile(ss);
+  std::string word_file;
+  int count;
+  while (infile >> word_file) {
+    if (word_file.length() > LETTERS)
+      continue;
+    count++;
+    if (word_trie->letter[word_file.length()] == NULL) {
+      word_trie->letter[word_file.length()] = new node;
+      word_trie->letter[word_file.length()]->path_0 = word_trie;
+      word_trie->letter[word_file.length()]->path = '0' + word_file.length();
+    }
+    node * traverse = word_trie->letter[word_file.length()];
+    for (auto target : word_file) {
+      if (traverse->letter[target - 'a'] == NULL) {
+        traverse->letter[target - 'a'] = new node;
+        traverse->letter[target - 'a']->path_0 = traverse;
+        traverse->letter[target - 'a']->path = target;
+      }
+      traverse = traverse->letter[target - 'a'];
+    }
+    traverse->F = true;
+    traverse->w = word_file;
+  }
+  return count;
 }
 
-void firstCall(char mat[15][15],int step)
-{
-	if (step==k+1)
-	{
-		for (int i=1;i<=k;i++)
-			std::cout<<ans[i]<<' ';
-		std::cout<<std::endl;
-//		for (int now=1;now<=k;now++)
-//		{
-//			for (int i=1;i<=n;i++)
-//			{
-//				for (int j=1;j<=m;j++)
-//				if (road[now][i][j]==0)
-//					cout<<"*";
-//				else
-//					cout<<road[now][i][j];
-//				cout<<endl;
-//			}
-//			cout<<endl;
-//		}
-//		cout<<"***********************"<<endl;
-		return;
-	}
-	std::string aa="";
-	for (int i=1;i<=n;i++)
-		for (int j=1;j<=m;j++)
-		if (mat[i][j]!=0 && son[1][mat[i][j]-'a']!=0 && (s[step][0]=='*' || s[step][0]==mat[i][j]))
-			circleCall(i,j,mat,step,1,aa+mat[i][j],son[1][mat[i][j]-'a']);
+
+int attribute(std::vector <std::string> tree, balance *point,
+              node *word_trie,
+              std::vector <int> len,
+              std::map <int, char> Map,
+              std::vector <std::string> *words,
+              std::set <std::string> *Map_set) {
+  if (len.size() == 0) {
+    std::string str_tmp = "";
+    for (const auto &pointer : *words)
+      str_tmp += pointer + " ";
+    Map_set->insert(str_tmp);
+    return false;
+  }
+  balance unit_trie = *point;
+  for (std::map <int, char>::reverse_iterator Map_new = Map.rbegin();
+       Map_new != Map.rend(); ++Map_new) {
+    unit_trie.wordlist_0[Map_new->first % unit_trie.d].erase(
+      unit_trie.wordlist_0[Map_new->first % unit_trie.d].begin()
+      + Map_new->first / unit_trie.d);
+  }
+  for (int i = 0; i < unit_trie.wordlist_0.size(); i++) {
+    for (int j = 0; j < unit_trie.wordlist_0.at(i).size(); j++) {
+      std::map <int, char> Map_trie;
+      std::vector <std::string> words_trie = *words;
+      std::string str_0, str_1;
+      if (words_trie.size() != 0) {
+        for (int x = 0; x < words_trie.size(); x++) {
+          str_0 = words_trie[x];
+          str_1 = tree[x];
+          int count = 0;
+          for (int y = 0; y < str_0.size(); y++) {
+            if (str_1[y] != '*') {
+              if (str_0[y] == str_1[y])
+                count++;
+            } else {
+              count++;
+            }
+          }
+          if (count != str_0.size())
+            return false;
+        }
+      }
+      if (word_trie->letter[len.front()]) {
+        if (trie(tree, &unit_trie, len,
+                 word_trie->letter[len.front()]->letter[unit_trie.
+                     wordlist_0.at(i).at(j) - 'a'],
+                 &Map_trie, i, j, &words_trie, Map_set)) {
+          *words = words_trie;
+          return true;
+        }
+      }
+    }
+  }
+  return false;
 }
 
-void init2()
-{
-	std::ifstream fin2("puzzles.txt");
-	while (fin2>>n>>m>>k)
-	{
-		task++;
-		for (int i=1;i<=n;i++)
-			fin2>>ch[i];
-		for (int i=1;i<=k;i++)
-		{
-			fin2>>s[i];
-			length[i]=s[i].size();
-		}
-		char mat[15][15];
-		for (int i=1;i<=n;i++)
-			for (int j=1;j<=m;j++)
-				mat[i][j]=ch[i][j-1];
-		firstCall(mat,1);
-		std::cout<<"task"<<task<<" finish"<<std::endl;
-//		while (1);
-	}
+
+std::vector <std::string> split_answer(const std::string& word_file,
+                                       const std::string& target) {
+  std::vector <std::string> word_s;
+  std::string::size_type tmp, mark;
+  mark = word_file.find(target);
+  tmp = 0;
+  while (std::string::npos != mark) {
+    word_s.push_back(word_file.substr(tmp, mark - tmp));
+    tmp = mark + target.size();
+    mark = word_file.find(target, tmp);
+  }
+  if (tmp != word_file.length())
+    word_s.push_back(word_file.substr(tmp));
+  return word_s;
 }
-int main()
-{
-//	freopen("ans.txt","w",stdout);
-	init1();
-	init2();
+
+
+bool status(const int& tree_len,
+            const std::vector<std::vector <char>>& result,
+            const std::vector <std::string>& tree,
+            std::vector <int> *len, balance *point) {
+  point->wordlist_1(tree_len);
+  for (int i = 0; i < point->d; i++) {
+    for (int j = 0; j < result.size(); j++)
+      point->wordlist_0[i][j] = result[result.size() - 1 - j][i];
+  }
+  for (auto &k : tree)
+    len->push_back(k.length());
+  if (len->size() == 0 || point->d == 0)
+    return false;
+  return true;
+}
+
+
+int main(int argc, char **argv) {
+  node word_trie = node();
+  node word_trie_len = node();
+  inputs(argv[1], &word_trie);
+  inputs(argv[2], &word_trie_len);
+  while (true) {
+    int flag = 0;
+    balance point = balance();
+    std::string str;
+    wordlist result;
+    std::string units;
+    std::string line = "";
+    while (std::cin) {
+      if (std::cin.eof()) exit(0);
+      getline(std::cin, line);
+      if (line == "") exit(0);
+      if (line.find("*") == std::string::npos) {
+        std::vector<char> data(line.begin(), line.end());
+        result.push_back(data);
+      } else {
+        units = line;
+        break;
+      }
+    }
+    int tree_len = result[0].size();
+    std::vector <std::string> tree = split_answer(units, " ");
+    head = &word_trie;
+    std::map <int, char> Map;
+    std::vector <int> len;
+    if (!status(tree_len, result, tree, &len, &point))
+      return false;
+    std::vector<std::string> words;
+    std::set<std::string> Map_set;
+    attribute(tree, &point, &word_trie, len, Map, &words, &Map_set);
+    if (Map_set.size() == 0) {
+      head = &word_trie_len;
+      attribute(tree,
+                &point, &word_trie_len, len, Map, &words, &Map_set);
+    }
+    for (const auto &pointer : Map_set)
+      std::cout << pointer << std::endl;
+    std::cout << "." << std::endl;
+  }
 }
