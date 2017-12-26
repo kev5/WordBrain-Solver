@@ -1,6 +1,8 @@
 # WordBrain Solver
 
-C++ and Python Programs for solving the puzzles in the WordBrain App on Android and iOS.
+C++ and Python Programs for solving the puzzles in the [WordBrain](https://play.google.com/store/apps/details?id=se.maginteractive.wordbrain&hl=en) App on Android and iOS.
+
+It is suggested to play the game first so that you can understand its rules and how it works, and it will also help you understand the programs.
 
 The inputs to the C++ and Python programs are given by a text file called [puzzles.txt](https://github.com/kev5/WordBrain-Solver/blob/master/puzzles.txt) which has the puzzles in the following format-
 ```
