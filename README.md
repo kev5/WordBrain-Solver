@@ -65,7 +65,7 @@ You can run the Python program in the following way-
 ```
 ~> python wordbrainsolver.py small_word_list.txt large_word_list.txt <puzzles.txt >solutions.txt
 ```
-You can run the C++ program in the following way-
+And the C++ program in the following way-
 ```
 ~> g++ wordbrainsolver.cpp -o wb
 ~> ./wb small_word_list.txt large_word_list.txt <puzzles.txt >solutions.txt
