@@ -61,7 +61,12 @@ banes holly cannon
 
 The programs take the [small_word_list.txt](https://github.com/kev5/WordBrain-Solver/blob/master/small_word_list.txt) and the [large_word_list.txt](https://github.com/kev5/WordBrain-Solver/blob/master/large_word_list.txt) files as arguments to look upto valid words that can be formed.
 
-You can run the programs in the following way-
+You can run the Python program in the following way-
 ```
-python wordbrainsolver.py small_word_list.txt large_word_list.txt <puzzles.txt >solutions.txt
+~> python wordbrainsolver.py small_word_list.txt large_word_list.txt <puzzles.txt >solutions.txt
+```
+You can run the C++ program in the following way-
+```
+~> g++ wordbrainsolver.cpp -o wb
+~> ./wb small_word_list.txt large_word_list.txt <puzzles.txt >solutions.txt
 ```
